@@ -4,32 +4,37 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Data.OleDb;
 using System.Web.Http;
+using System.Web.Mvc;
 
 namespace Api.Controllers
 {
     public class LocationController : ApiController
     {
-        [Route("api/location/get_location")]
-        public string get_location()
+        [System.Web.Http.Route("api/location/get_location")]
+        public IHttpActionResult get_location()
         {
             JObject obj = new JObject();
+            dynamic result = null;
             try
             {
                 string sql = @"select * from tbl_location";
                 obj["success"] = true;
-                obj["data"] = DAL.serializeDataTable(sql, new OleDbCommand());
+                obj["data"] = JsonConvert.DeserializeObject<dynamic>(DAL.serializeDataTable(sql, new OleDbCommand()));
             }
             catch (Exception ex)
             {
                 obj["success"] = false;
                 obj["data"] = ex.Message + " " + ex.StackTrace;
+                result = JsonConvert.DeserializeObject<dynamic>(obj.ToString());
             }
-            return obj.ToString();
+
+            return Ok ( new { obj });
         }
 
-        [Route("api/location/get_location")]
-        public string get(int location_id)
+        [System.Web.Http.Route("api/location/get_location")]
+        public IHttpActionResult get_location_by_id(int location_id)
         {
+            string result = "";
             JObject obj = new JObject(); 
             try
             {
@@ -37,15 +42,15 @@ namespace Api.Controllers
                 OleDbCommand cmd = new OleDbCommand();
                 cmd.Parameters.AddWithValue("@location_id", location_id);
                 obj["success"] = true;
-                obj["data"] = DAL.serializeDataTable(sql, cmd);
+                obj["data"] = JsonConvert.DeserializeObject<dynamic>(DAL.serializeDataTable(sql, new OleDbCommand()));
             }
             catch (Exception ex)
             {
                 obj["success"] = false;
                 obj["data"] = ex.Message + " " + ex.StackTrace;
+                result = JsonConvert.DeserializeObject<dynamic>(obj.ToString());
             }
-            return obj.ToString();
+            return Ok(new { obj });
         }
-
     }
 }
